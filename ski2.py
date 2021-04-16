@@ -34,10 +34,10 @@ Y0 = 0
 
 class Gauss():
 
-    A = 2000
+    A = 100
     C = -1
-    sigmaX = 10
-    sigmaY = 10
+    sigmaX = 16
+    sigmaY = 16
     sigmaX2 = sigmaX**2
     sigmaY2 = sigmaY**2
 
@@ -76,13 +76,30 @@ class Paraboloid():
         return self.kx*(X-self.X0)**2 + self.ky*(Y-self.Y0)**2
 
     def fun_x(self, X, Y):
-        return -2*self.kx*(X - self.X0)
+        return 2*self.kx*(X - self.X0)
 
     def fun_y(self, X, Y):
-        return -2*self.ky*(Y - self.Y0)
+        return 2*self.ky*(Y - self.Y0)
+
+class Cone():
+
+    k = 100
+
+    def __init__(self, X0, Y0):
+        self.X0 = X0
+        self.Y0 = Y0
+
+    def fun(self, X, Y):
+        return numpy.sqrt(self.k * ((X - self.X0)**2 + (Y - self.Y0)**2))
+
+    def fun_x(self, X, Y):
+        return self.k * (X - self.X0) / numpy.sqrt(self.k * ((X - self.X0)**2 + (Y - self.Y0)**2))
+
+    def fun_y(self, X, Y):
+        return self.k * (Y - self.Y0) / numpy.sqrt(self.k * ((X - self.X0)**2 + (Y - self.Y0)**2))
 
 # added gaussian curves
-points = [(65, 45), (30, 30), (120, 50), (50, 100)] 
+points = [(65, 35), (30, 30), (120, 50), (50, 100)] 
 
 def curve(X, Y):
     parab = Paraboloid(75, 65)
@@ -94,8 +111,27 @@ def curve(X, Y):
 
 def curve_l(X, Y):
     parab = Paraboloid(75, 65)
-    zx = parab.fun_x(X, Y)
-    zy = parab.fun_y(X, Y)
+    zx = -parab.fun_x(X, Y)
+    zy = -parab.fun_y(X, Y)
+    for p in points:
+        gau = Gauss(p[0], p[1])
+        zx += gau.fun_x(X, Y)
+        zy += gau.fun_y(X, Y)
+
+    return math.atan2(zy, zx)
+
+def curve_c(X, Y):
+    cone = Cone(75, 65)
+    z = cone.fun(X, Y)
+    for p in points:
+        gau = Gauss(p[0], p[1])
+        z += gau.fun(X, Y)
+    return z
+
+def curve_cl(X, Y):
+    cone = Cone(75, 65)
+    zx = -cone.fun_x(X, Y)
+    zy = -cone.fun_y(X, Y)
     for p in points:
         gau = Gauss(p[0], p[1])
         zx += gau.fun_x(X, Y)
@@ -146,23 +182,10 @@ Z = curve(X, Y)
 origin, destiny = (0, 0), (75, 65) # 0, 0 and X0, Y0
 P = ski(curve, origin, destiny)
 P2 = ski2(curve_l, origin, destiny)
-# P2x, P2y = ski(curve_l, origin, destiny)
-
-# # derivative
-# Z = parab.fun_x(X, Y)
-# for p in points:
-#     gau = Gauss(p[0], p[1])
-#     try:
-#         Z += gau.fun_x(X, Y)
-#     except:
-#         Z = gau.fun_x(X, Y)
-
-# Z = 2*X**2 - Y**2 # saddle
-# Z = Y # plane
+Z2 = curve_c(X, Y)
+P3 = ski2(curve_cl, origin, destiny)
 
 # ======================================
-## reference picture (X, Y and Z in 2D):
-
 
 def show_3D():
 
@@ -182,10 +205,6 @@ def show_3D():
 
     title = ax.set_title("SKI")
     title.set_y(1.01)
-
-    # ax.xaxis.set_major_locator(MaxNLocator(20))
-    # ax.yaxis.set_major_locator(MaxNLocator(20))
-    # ax.zaxis.set_major_locator(MaxNLocator(10))
 
     fig.tight_layout()
     fig.savefig('3D-constructing-{}.png'.format(N))
@@ -212,6 +231,18 @@ def show_2D2():
     plt.tight_layout()
     plt.savefig("Heatmap.png")
 
+def show_2D3():
+
+    line_x = [P3[i][0]*130/300 for i in range(len(P3))]
+    line_y = [P3[i][1]*150/300 for i in range(len(P3))]
+    
+    plt.plot(line_x, line_y, color="black")
+    plt.imshow(Z2, cmap='viridis', aspect=130/150, origin='lower')
+    plt.colorbar()
+    plt.tight_layout()
+    plt.savefig("Heatmap.png")
+
 # show_3D()
 # show_2D()
-show_2D2()
+# show_2D2()
+show_2D3()
