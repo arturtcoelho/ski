@@ -34,7 +34,7 @@ Y0 = 0
 
 class Gauss():
 
-    A = 100
+    A = 150
     C = -1
     sigmaX = 16
     sigmaY = 16
@@ -99,7 +99,7 @@ class Cone():
         return self.k * (Y - self.Y0) / numpy.sqrt(self.k * ((X - self.X0)**2 + (Y - self.Y0)**2))
 
 # added gaussian curves
-points = [(65, 35), (30, 30), (120, 50), (50, 100)] 
+points = [(50, i*20) for i in range(5)] 
 
 def curve(X, Y):
     parab = Paraboloid(75, 65)
@@ -189,15 +189,16 @@ P3 = ski2(curve_cl, origin, destiny)
 
 def show_3D():
 
-    line_x = [P[i][0] for i in range(len(P))]
-    line_y = [P[i][1] for i in range(len(P))]
-    line_z = [0 for i in range(len(P))]
+    line_x = [P3[i][0] for i in range(len(P3))]
+    line_y = [P3[i][1] for i in range(len(P3))]
+    line_z = [0 for i in range(len(P3))]
     
     fig = plt.figure()
     ax = fig.add_subplot(111 , projection='3d')
     ax.set_xlim(ranx)
     ax.set_ylim(rany)
     ax.view_init(elev=90, azim=270)
+    # elev=90, azim=270
 
     ax.plot(line_x, line_y, line_z, '-k', linewidth=5)
 
@@ -207,7 +208,7 @@ def show_3D():
     title.set_y(1.01)
 
     fig.tight_layout()
-    fig.savefig('3D-constructing-{}.png'.format(N))
+    fig.savefig('3D-constructing.png'.format(N))
 
 def show_2D():
 
